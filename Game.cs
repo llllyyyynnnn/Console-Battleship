@@ -8,17 +8,21 @@ int gridStart = 2;
 Vector2 gridSpacing = new Vector2(gridStart + 2, gridStart);
 
 const char charFiller = '~';
+const char charMissed = '*';
 const char charShip = '#';
+
 const int alphabetASCIIStartIndex = 97; // abcdefghj...
 const int alphabetCapsASCIIStartIndex = 65; // ABCDEFGHJ...
 const int numberASCIIStartIndex = 48; // 0123456789...
 
+string lastMessage = string.Empty;
+
 List<Logic.shipStats> ships = new List<Logic.shipStats>();
 List<Vector2> pointsAttacked = new List<Vector2>();
+List<Vector2> pointsShot = new List<Vector2>();
 Vector2 shipsMinimumDistance = new Vector2(1, 1);
 bool shipsVisible = false;
 int pointsToHit = 0;
-int shotAmount = 0;
 
 void InitializeGame()
 {
@@ -124,6 +128,7 @@ void ResetGame()
 {
     ships.Clear();
     pointsAttacked.Clear();
+    pointsShot.Clear();
     pointsToHit = 0;
     gameOngoing = false;
     
@@ -133,7 +138,14 @@ void ResetGame()
 void PauseGame() => System.Threading.Thread.Sleep(gamePauseTime);
 void DrawHitPoints()
 {
-    for(int i = 0; i < pointsAttacked.Count; i++)
+    for (int i = 0; i < pointsShot.Count; i++)
+    {
+        Console.SetCursorPosition(gridStart + (int)(pointsShot[i].X * gridSpacing.X), gridStart + (int)(pointsShot[i].Y * gridSpacing.Y));
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Write(charMissed);
+    }
+
+    for (int i = 0; i < pointsAttacked.Count; i++)
     {
         Console.SetCursorPosition(gridStart + (int)(pointsAttacked[i].X * gridSpacing.X), gridStart + (int)(pointsAttacked[i].Y * gridSpacing.Y));
         Console.ForegroundColor = ConsoleColor.Yellow;
@@ -147,8 +159,9 @@ void DrawMessages()
     Console.ForegroundColor = ConsoleColor.White;
 
     Console.WriteLine($"Points left to hit: {(pointsToHit - pointsAttacked.Count)}");
-    Console.WriteLine($"You have shot: {(shotAmount)} times");
+    Console.WriteLine($"You have shot: {(pointsShot.Count())} times");
     Console.WriteLine($"Write 'attack XY' to attack a point and 'help' for more commands.");
+    Console.WriteLine($"\n{lastMessage}");
 }
 void DrawGame()
 {
@@ -185,20 +198,23 @@ Logic.coordinateInput ValidateCoordinateInput(string coordinate)
     }
 
     if (input.valid == false)
+    {
         Console.WriteLine("Input was invalid or out of range.");
+        PauseGame();
+    }
 
     return input;
 }
 
 void AttackPoint(Vector2 position)
 {
-    if (pointsAttacked.Contains(position))
+    if (pointsAttacked.Contains(position) || pointsShot.Contains(position))
     {
         Console.WriteLine("Point already hit!");
         return;
     }
 
-    shotAmount += 1;
+    pointsShot.Add(position);
 
     if (ships.Count > 0)
     {
@@ -218,9 +234,9 @@ void AttackPoint(Vector2 position)
                 shipReference.hit += 1;
                 ships[i] = shipReference;
 
-                Console.WriteLine("Ship was found in this coordinate.");
+                lastMessage = $"Ship was found in {(char)(position.X+alphabetCapsASCIIStartIndex)}{position.Y}";
                 if (shipReference.hit >= shipSize)
-                    Console.WriteLine("Ship has been fully destroyed!");
+                    lastMessage = "Ship has been fully destroyed!";
 
                 return;
             }
@@ -265,6 +281,7 @@ void RegisterCommand(string input)
 void GameLoop()
 {
     DrawGame();
+
     try
     {
         RegisterCommand(Console.ReadLine());
