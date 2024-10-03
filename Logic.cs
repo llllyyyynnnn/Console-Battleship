@@ -1,29 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Numerics;
-using System.Reflection.Metadata;
+﻿using System.Numerics;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace project01
+namespace Functions
 {
     internal class Logic
     {
-        public static bool IsInsideRect(Vector2 startPos1, Vector2 endPos1, Vector2 startPos2, Vector2 endPos2)
-        {
-            return !(endPos1.X < startPos2.X || startPos1.X > endPos2.X ||
-                     endPos1.Y < startPos2.Y || startPos1.Y > endPos2.Y);
-        }
-        
+        public static bool IsInsideRect(Vector2 startPos1, Vector2 endPos1, Vector2 startPos2, Vector2 endPos2) => 
+            !(endPos1.X < startPos2.X || startPos1.X > endPos2.X || endPos1.Y < startPos2.Y || startPos1.Y > endPos2.Y);
+
         public struct shipStats
         {
             public Vector2 startPosition;
             public Vector2 endPosition;
-            public direction direction;
+            public Direction direction;
             public int size;
+            public int hit;
         }
 
         public struct coordinateInput
@@ -32,7 +23,7 @@ namespace project01
             public bool valid;
         }
 
-        public enum direction
+        public enum Direction
         {
             horizontal = 0,
             vertical = 1
