@@ -20,6 +20,7 @@ public partial class Game
         pointsAttacked.Clear();
         pointsShot.Clear();
         pointsToHit = 0;
+        roundMessage = string.Empty;
         gameOngoing = false;
 
         InitializeGame();
